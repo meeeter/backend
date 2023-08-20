@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+require("dotenv").config();
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
@@ -17,6 +18,19 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+
+const mongoose = require("mongoose");
+const MONGODB_URL = process.env.MONGODB_URL;
+const mongooseLoader = async () => {
+  try {
+    await mongoose.connect(MONGODB_URL, { dbName: "meeeter" });
+    console.log("connected to database");
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+mongooseLoader();
 
 app.use(function (req, res, next) {
   next(createError(404));
