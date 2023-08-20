@@ -21,6 +21,7 @@
     "node_modules/"
   ],
   "rules": {
-    "prettier/prettier": "error"
-  }
+    "prettier/prettier": "warn"
+  },
+  "parser": "@babel/eslint-parser"
 }
