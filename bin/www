@@ -1,11 +1,17 @@
 const app = require("../app");
-const debug = require("debug")("backend:server");
+const debug = require("debug")("meeter-server:server");
 const http = require("http");
+const socketIo = require("socket.io");
 
 const port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
 
 const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: '*',
+  }
+});
 
 server.listen(port);
 server.on("error", onError);
@@ -24,6 +30,14 @@ function normalizePort(val) {
 
   return false;
 }
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected", socket.id);
+  });
+});
 
 function onError(error) {
   if (error.syscall !== "listen") {
