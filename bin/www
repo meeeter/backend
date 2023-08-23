@@ -34,6 +34,10 @@ function normalizePort(val) {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  const userId = socket.handshake.headers.userid;
+
+  socket.join(userId);
+
   socket.on("disconnect", () => {
     console.log("User disconnected", socket.id);
   });
@@ -67,6 +71,11 @@ io.on("connection", (socket) => {
         },
         { new: true }
       );
+
+      io.to(request.recipient).emit("friendRequestReceived", {
+        sender: request.sender,
+        status: request.status,
+      });
     } catch (error) {
       console.error(error);
     }
