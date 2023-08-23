@@ -37,6 +37,40 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected", socket.id);
   });
+
+  socket.on("sendFriendRequest", async (request) => {
+    try {
+      const User = require("../models/User");
+
+      const sender = await User.findByIdAndUpdate(
+        request.sender,
+        {
+          $push: {
+            friendRequestsSent: {
+              toUser: request.recipient,
+              status: "pending",
+            },
+          },
+        },
+        { new: true }
+      );
+
+      const recipient = await User.findByIdAndUpdate(
+        request.recipient,
+        {
+          $push: {
+            friendRequestsReceived: {
+              fromUser: request.sender,
+              status: "pending",
+            },
+          },
+        },
+        { new: true }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  });
 });
 
 function onError(error) {
