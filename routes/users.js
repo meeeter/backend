@@ -51,6 +51,31 @@ router.get("/:userId", async (req, res, next) => {
   }
 });
 
+router.post("/:userId/friends", async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const { friendId } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.friends.includes(friendId)) {
+      return res.status(400).json({ error: "User is already a friend" });
+    }
+
+    user.friends.push(friendId);
+
+    await user.save();
+
+    return res.status(200).json({ message: "Friend added successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.get("/:userId/friend-requests", async (req, res, next) => {
   try {
     const userId = req.params.userId;
