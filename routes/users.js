@@ -75,4 +75,32 @@ router.get("/:userId/friend-requests", async (req, res, next) => {
   }
 });
 
+router.delete("/:userId/friend-requests", async (req, res, next) => {
+  const userId = req.params.userId;
+  const friendId = req.query.friendId;
+
+  try {
+    const result = await User.findByIdAndUpdate(
+      userId,
+      {
+        $pull: {
+          friendRequestsSent: { toUser: friendId },
+          friendRequestsReceived: { fromUser: friendId },
+        }
+      },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await result.save();
+
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
