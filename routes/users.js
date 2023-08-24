@@ -18,6 +18,25 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.post("/", async (req, res, next) => {
+  const { email, displayName, photoURL } = req.body.user;
+
+  try {
+    const existingUser = await User.findOne({ email }).exec();
+
+    if (existingUser) {
+      return res.status(409).json({ message: "User already registered" });
+    } else {
+      const newUser = await User.create({ email, username: displayName, photoURL });
+
+      res.status(201).json({ newUser });
+    }
+  } catch (error) {
+    console.error("Error creating user", error);
+    res.status(500).json({ success: false, message: "User registration failed" });
+  }
+});
+
 router.get("/:userId", async (req, res, next) => {
   try {
     const userId = req.params.userId;
@@ -53,25 +72,6 @@ router.get("/:userId/friend-requests", async (req, res, next) => {
   } catch (error) {
     console.error("Error fetching friend requests:", error);
     res.status(500).json({ message: "Server error" });
-  }
-});
-
-router.post("/", async (req, res, next) => {
-  const { email, displayName, photoURL } = req.body.user;
-
-  try {
-    const existingUser = await User.findOne({ email }).exec();
-
-    if (existingUser) {
-      return res.status(409).json({ message: "User already registered" });
-    } else {
-      const newUser = await User.create({ email, username: displayName, photoURL });
-
-      res.status(201).json({ newUser });
-    }
-  } catch (error) {
-    console.error("Error creating user", error);
-    res.status(500).json({ success: false, message: "User registration failed" });
   }
 });
 
