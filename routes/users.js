@@ -61,7 +61,6 @@ router.get("/:userId/friends", async (req, res, next) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log(user.friends);
     return res.status(200).json({ friends: user.friends });
   } catch (error) {
     return res.status(500).json({ error: "Internal server error" });
