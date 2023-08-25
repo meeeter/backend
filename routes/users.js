@@ -51,6 +51,23 @@ router.get("/:userId", async (req, res, next) => {
   }
 });
 
+router.get("/:userId/friends", async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId).populate("friends");
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log(user.friends);
+    return res.status(200).json({ friends: user.friends });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
+})
+
 router.post("/:userId/friends", async (req, res, next) => {
   try {
     const userId = req.params.userId;
