@@ -2,6 +2,7 @@ const app = require("../app");
 const debug = require("debug")("meeter-server:server");
 const http = require("http");
 const socketIo = require("socket.io");
+const User = require("../models/User");
 
 const port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
@@ -42,10 +43,29 @@ io.on("connection", (socket) => {
     console.log("User disconnected", socket.id);
   });
 
+  socket.on("updateLocation", async (data) => {
+    const { id, username, location } = data;
+
+    try {
+      const user = await User.findById(id);
+
+      const friends = await User.find({ _id: { $in: user.friends } });
+
+      friends.forEach((friend) => {
+        const friendIdToString = friend._id.toString();
+        io.to(friendIdToString).emit("friendLocationUpdate", {
+          id,
+          username,
+          location,
+        });
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
   socket.on("sendFriendRequest", async (request) => {
     try {
-      const User = require("../models/User");
-
       const sender = await User.findByIdAndUpdate(
         request.sender,
         {
